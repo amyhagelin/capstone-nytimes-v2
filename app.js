@@ -69,7 +69,7 @@ function renderSearchData(data) {
       var currentDate = moment(item.pub_date).fromNow(); // .format('MMM Do YYYY')
       if (item.headline.main === undefined) {
  	     return acc += '<div><a target="_blank" href="' + item.web_url + '"><h3>' + 
-       item.headline.name + '</h3></a><button>&#10133;</button><p>' + currentDate + '</p><p>' 
+       item.headline.name + '</h3></a><p>' + currentDate + '</p><p>' 
 	     + item.snippet + '</p></div>'
   	  }
 	     else {
