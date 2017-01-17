@@ -1,0 +1,17 @@
+body {
+/*	font-family: 'Merriweather', serif;
+*/	font-family: 'Hind', sans-serif;
+}
+
+h1 {
+/*	font-family: 'UnifrakturMaguntia', cursive;
+*/
+}
+
+button.start-over {
+	float: right;
+	}
+
+.header {
+	height: 40px;
+}
