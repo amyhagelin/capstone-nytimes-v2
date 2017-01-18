@@ -29,7 +29,7 @@ function renderHome() {
       "<p>Input the topics you'd like to read about today, clicking the + button after each one. When you're finished, click Next.</p>" +
       '<form action="#" class="js-submit-form">' +
       '<label for="query"></label>' +
-         '<input type="text" class="js-query">'+
+         '<input id="clear-me" type="text" class="js-query">'+
          '<button type="submit">&#10133;</button></br>'+
        '</form>'+
        '<button class="next">Next</button>'+
@@ -49,7 +49,7 @@ function renderHome() {
 
 
 function renderHeader() {
-  var resultElement = '<div><button class="start-over">Start Over</button></div>';
+  var resultElement = '<div><button class="start-over">New Search</button></div>';
   $('#header').html(resultElement);
 }
 
@@ -89,7 +89,7 @@ function renderSearchData(data) {
 function watchSubmit() {
   $(document).on('submit', '.js-submit-form', function(e) {
     e.preventDefault();
-    $( "#start-page-search" ).hide();
+     $( "#start-page-search" ).hide();
     $( ".hide-me" ).hide();
     var query = $(this).find('.js-query').val();
     state.searchTermArr.push(query);
@@ -131,6 +131,7 @@ $( document ).ready(function() {
   $(document).on('click', 'button.next', function(event) { 
         $( "#start-page-search" ).hide();
         renderHeader();
+        $("#search-terms").prepend("<p>Click on a search term to see the latest articles:</p>");
         $( "#start-page" ).hide();
         watchSearchTermButton();
     });
