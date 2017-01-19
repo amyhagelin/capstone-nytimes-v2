@@ -1,6 +1,8 @@
 
-// clean up indents
-// send email when ready
+// set quotations to either " or '
+// update buttons with #id instead of class
+// create watchNext and watchStartOver functions
+
 
 var state = {
   url: "https://api.nytimes.com/svc/search/v2/articlesearch.json",
@@ -49,10 +51,14 @@ function renderHome() {
 
 
 function renderHeader() {
-  var resultElement = '<div><button class="start-over">New Search</button></div>';
+  var resultElement = '<div><button class="new-search">New Search</button></div>';
   $('#header').html(resultElement);
 }
 
+function renderFavoritesButton() {
+  var resultElement = '<div><button class="favorites">My Reading List</button></div>';
+  $('#favorites').html(resultElement);
+}
 
 function renderSearchTermButton(searchTerms) {
 	var resultElement = searchTerms.reduce(function(acc, item) {
@@ -68,13 +74,15 @@ function renderSearchData(data) {
     resultElement = data.response.docs.reduce(function(acc, item) {
       var currentDate = moment(item.pub_date).fromNow(); // .format('MMM Do YYYY')
       if (item.headline.main === undefined) {
- 	     return acc += '<div><a target="_blank" href="' + item.web_url + '"><h3>' + 
-       item.headline.name + '</h3></a><p>' + currentDate + '</p><p>' 
+ 	     return acc += '<div class="article"><a target="_blank" href="' + item.web_url + '"><h3>' + 
+       item.headline.name + '</h3></a><div class="second-line"><p>' + currentDate +
+       '<button class="add-to-fav-button" data-article-id="' + item._id + '">&#10133;</button></p></div><p>' 
 	     + item.snippet + '</p></div>'
   	  }
 	     else {
-  	    return acc += '<div><a target="_blank" href="' + item.web_url + '"><h3>' + 
-  	    item.headline.main + '</h3></a><button data-article-id="' + item._id + '">&#10133;</button><p>' + currentDate + '</p><p>' 
+  	    return acc += '<div class="article"><a target="_blank" href="' + item.web_url + '"><h3>' + 
+  	    item.headline.main + '</h3></a><div class="second-line"><p>' + currentDate +
+        '<button class="add-to-fav-button" data-article-id="' + item._id + '">&#10133;</button></p></div><p>'
   	    + item.snippet + '</p></div>'
       }
     }, '')
@@ -86,14 +94,33 @@ function renderSearchData(data) {
 }
 
 
+function renderFavorites(data) {
+  var resultElement = ''; 
+  resultElement = data.reduce(function(acc, item) {
+      var currentDate = moment(item[0].pub_date).fromNow(); // .format('MMM Do YYYY')
+      if (item[0].headline.main === undefined) {
+       return acc += '<div class="article"><a target="_blank" href="' + item[0].web_url + '"><h3>' + 
+       item[0].headline.name + '</h3></a><div class="second-line"><p>' + currentDate +
+       '</p></div><p>' + item[0].snippet + '</p></div>'
+      }
+       else {
+        return acc += '<div class="article"><a target="_blank" href="' + item[0].web_url + '"><h3>' + 
+        item[0].headline.main + '</h3></a><div class="second-line"><p>' + currentDate +
+        '</p></div><p>' + item[0].snippet + '</p></div>'
+      }
+    }, '');
+  $('#js-search-results').html(resultElement);
+}
+
 function watchSubmit() {
   $(document).on('submit', '.js-submit-form', function(e) {
     e.preventDefault();
-     $( "#start-page-search" ).hide();
-    $( ".hide-me" ).hide();
+     $( '#start-page-search' ).hide();
+    $( '.hide-me' ).hide();
     var query = $(this).find('.js-query').val();
     state.searchTermArr.push(query);
     renderSearchTermButton(state.searchTermArr);
+    $('.js-query').val('');
   });
 }
 
@@ -103,14 +130,18 @@ function watchSearchBox() {
     e.preventDefault();
     $( "#start-page" ).hide();
     $( "p.hide-me" ).hide();
-    $(function(){renderHeader();});
+    renderHeader();
     var query = $(this).find('.js-query').val();
     if($('#new-box').prop('checked')) {
-      getDataFromApi(query, renderSearchData, 'newest');
+      getDataFromApi(query, function(result) {
+        state.searchResults = result.response.docs;
+        renderSearchData(result);
+      }, 'newest');
     }
     if($('#relevant-box').prop('checked')) {
       getDataFromApi(query, renderSearchData);
     }
+    $('.js-query').val('');
   });
 }
 
@@ -123,24 +154,61 @@ function watchSearchTermButton() {
   });
 	}
 
+function watchNext() {
+  $(document).on('click', 'button.next', function(event) { 
+    $( "#start-page-search" ).hide();
+    renderHeader();
+    $("#search-terms").prepend("<p>Click on a search term to see the latest articles:</p>");
+    $( "#start-page" ).hide();
+    watchSearchTermButton();
+  }); 
+}
 
-$( document ).ready(function() {
+
+function watchNewSearch() {
+  $(document).on('click', 'button.new-search', function(event) { 
+    $('#js-search-results').empty();
+    $('#search-terms').empty();
+    $( "#header" ).hide();
+    renderHome();
+    state.searchTermArr = [];
+  });
+}
+
+
+function watchFavorites() {
+  $(document).on('click', 'button.favorites', function(event) { 
+  renderFavorites(state.favoriteArticles);
+  });
+  }
+
+
+$(function() {
   renderHome();
   watchSubmit();
-  $(function(){watchSearchBox();});
-  $(document).on('click', 'button.next', function(event) { 
-        $( "#start-page-search" ).hide();
-        renderHeader();
-        $("#search-terms").prepend("<p>Click on a search term to see the latest articles:</p>");
-        $( "#start-page" ).hide();
-        watchSearchTermButton();
+  watchSearchBox();
+  watchNext();
+  watchNewSearch();
+  $(document).on('click', '.add-to-fav-button', function(event) { 
+    var articleId = $(this).data('article-id');
+    // we have articleId
+    // then we have to have article object
+    // so we have to find proper article in searchResults using articleId
+    // then we can finally add the object into the favoriteArticles array
+    console.log(articleId);
+    console.log(state.searchResults);
+    // use https://api.jquery.com/jQuery.inArray/ instead
+    var article = jQuery.grep(state.searchResults, function(item) {
+      return item._id === articleId;
     });
-    $(document).on('click', 'button.start-over', function(event) { 
-        $('#js-search-results').empty();
-        $('#search-terms').empty();
-        $( "#header" ).hide();
-        renderHome();
-        state.searchTermArr = [];
-});
+    console.log(article);
+    state.favoriteArticles.push(article);
+    console.log(state.favoriteArticles);
+    renderFavoritesButton();
+    watchFavorites();
+    // render the fav article
+    // store it somewhere, and rerender whole array
+    // store using localStorage (?)
+  });
 });
 
