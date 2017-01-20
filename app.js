@@ -11,6 +11,11 @@ var state = {
   favoriteArticles: []
 }
 
+if (localStorage) {
+  state.favoriteArticles = JSON.parse(localStorage.getItem('articles'))
+  console.log(state.favoriteArticles)
+}
+
 
 function getDataFromApi(searchTerm, callback, sort) {
   var query = {
@@ -23,11 +28,17 @@ function getDataFromApi(searchTerm, callback, sort) {
   $.getJSON(state.url, query, callback);
 }
 
+function getDataAndSaveResults(searchTerm, callback, sort) {
+  getDataFromApi(searchTerm, function(result) {
+    state.searchResults = result.response.docs;
+    callback(result);
+  }, sort);
+}
+
 
 function renderHome() {
   var resultElement = 
   '<div id="start-page">' +
-      '<h1>My NY Times</h1>'+
       "<p>Input the topics you'd like to read about today, clicking the + button after each one. When you're finished, click Next.</p>" +
       '<form action="#" class="js-submit-form">' +
       '<label for="query"></label>' +
@@ -36,14 +47,14 @@ function renderHome() {
        '</form>'+
        '<button class="next">Next</button>'+
      '</div>'+
-     '<p class="hide-me">Or search for an article directly...</p>'+
+     '<p class="hide-me">Or search for an article directly:</p>'+
      '<div id="start-page-search">'+
        '<form action="#" class="js-search-form">'+
        '<label for="query"></label>'+
        '<input type="text" class="js-query">'+
        '<button type="submit">Search</button>'+
-       '<label><input type="radio" name="article-search-type" id="new-box" value="first_checkbox" required>Show newest first</label>'+
-        '<input type="radio" name="article-search-type" id="relevant-box" value="second_checkbox" required> <label for="cbox2">Show most relevant first</label>'+
+       '<label><input class="search-type" type="radio" name="article-search-type" id="new-box" value="first_checkbox" required>Show newest first</label>'+
+        '<input class="search-type" type="radio" name="article-search-type" id="relevant-box" value="second_checkbox" required> <label for="cbox2">Show most relevant first</label>'+
      '</form>'+
   '</div>';
   $('#home').html(resultElement);
@@ -51,14 +62,14 @@ function renderHome() {
 
 
 function renderHeader() {
-  var resultElement = '<div><button class="new-search">New Search</button></div>';
+  var resultElement = '<div><h1>My NY Times</h1><div class="header-buttons"><button class="favorites">My Reading List</button><button class="new-search">New Search</button></div></div>';
   $('#header').html(resultElement);
 }
 
-function renderFavoritesButton() {
-  var resultElement = '<div><button class="favorites">My Reading List</button></div>';
-  $('#favorites').html(resultElement);
-}
+// function renderFavoritesButton() {
+//   var resultElement = '<div><button class="favorites">My Reading List</button></div>';
+//   $('#favorites').html(resultElement);
+// }
 
 function renderSearchTermButton(searchTerms) {
 	var resultElement = searchTerms.reduce(function(acc, item) {
@@ -76,13 +87,13 @@ function renderSearchData(data) {
       if (item.headline.main === undefined) {
  	     return acc += '<div class="article"><a target="_blank" href="' + item.web_url + '"><h3>' + 
        item.headline.name + '</h3></a><div class="second-line"><p>' + currentDate +
-       '<button class="add-to-fav-button" data-article-id="' + item._id + '">&#10133;</button></p></div><p>' 
+       '<button title="Add to My Reading List" class="add-to-fav-button" data-article-id="' + item._id + '">&#10133;</button></p></div><p>' 
 	     + item.snippet + '</p></div>'
   	  }
 	     else {
   	    return acc += '<div class="article"><a target="_blank" href="' + item.web_url + '"><h3>' + 
   	    item.headline.main + '</h3></a><div class="second-line"><p>' + currentDate +
-        '<button class="add-to-fav-button" data-article-id="' + item._id + '">&#10133;</button></p></div><p>'
+        '<button title="Add to My Reading List" class="add-to-fav-button" data-article-id="' + item._id + '">&#10133;</button></p></div><p>'
   	    + item.snippet + '</p></div>'
       }
     }, '')
@@ -95,18 +106,16 @@ function renderSearchData(data) {
 
 
 function renderFavorites(data) {
+  console.log(data)
   var resultElement = ''; 
   resultElement = data.reduce(function(acc, item) {
-      var currentDate = moment(item[0].pub_date).fromNow(); // .format('MMM Do YYYY')
       if (item[0].headline.main === undefined) {
-       return acc += '<div class="article"><a target="_blank" href="' + item[0].web_url + '"><h3>' + 
-       item[0].headline.name + '</h3></a><div class="second-line"><p>' + currentDate +
-       '</p></div><p>' + item[0].snippet + '</p></div>'
+       return acc += '<div class="article"><a target="_blank" href="' + item[0].web_url + '"><h3 class="article-headline">' + 
+       item[0].headline.name + '</h3></a><p>' + item[0].snippet + '</p></div>'
       }
        else {
-        return acc += '<div class="article"><a target="_blank" href="' + item[0].web_url + '"><h3>' + 
-        item[0].headline.main + '</h3></a><div class="second-line"><p>' + currentDate +
-        '</p></div><p>' + item[0].snippet + '</p></div>'
+        return acc += '<div class="article"><a target="_blank" href="' + item[0].web_url + '"><h3 class="article-headline">' + 
+        item[0].headline.main + '</h3></a><p>' + item[0].snippet + '</p></div>'
       }
     }, '');
   $('#js-search-results').html(resultElement);
@@ -133,13 +142,10 @@ function watchSearchBox() {
     renderHeader();
     var query = $(this).find('.js-query').val();
     if($('#new-box').prop('checked')) {
-      getDataFromApi(query, function(result) {
-        state.searchResults = result.response.docs;
-        renderSearchData(result);
-      }, 'newest');
+      getDataAndSaveResults(query, renderSearchData, 'newest');
     }
     if($('#relevant-box').prop('checked')) {
-      getDataFromApi(query, renderSearchData);
+      getDataAndSaveResults(query, renderSearchData);
     }
     $('.js-query').val('');
   });
@@ -150,7 +156,7 @@ function watchSearchTermButton() {
 	$(document).on('click', 'button.search-term', function(event) { 
   	event.preventDefault();
   	var searchTerm = $(this).text();
-  	getDataFromApi(searchTerm, renderSearchData, 'newest')
+  	getDataAndSaveResults(searchTerm, renderSearchData, 'newest')
   });
 	}
 
@@ -171,6 +177,7 @@ function watchNewSearch() {
     $('#search-terms').empty();
     $( "#header" ).hide();
     renderHome();
+    renderHeader();
     state.searchTermArr = [];
   });
 }
@@ -179,11 +186,13 @@ function watchNewSearch() {
 function watchFavorites() {
   $(document).on('click', 'button.favorites', function(event) { 
   renderFavorites(state.favoriteArticles);
+  renderHeader();
   });
   }
 
 
 $(function() {
+  renderHeader();
   renderHome();
   watchSubmit();
   watchSearchBox();
@@ -203,8 +212,11 @@ $(function() {
     });
     console.log(article);
     state.favoriteArticles.push(article);
+    if (localStorage) {
+      localStorage.setItem('articles', JSON.stringify(state.favoriteArticles))  
+    }
     console.log(state.favoriteArticles);
-    renderFavoritesButton();
+    // renderFavoritesButton();
     watchFavorites();
     // render the fav article
     // store it somewhere, and rerender whole array

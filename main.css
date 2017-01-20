@@ -1,41 +1,131 @@
 body {
-/*	font-family: 'Merriweather', serif;
-*/	font-family: 'Hind', sans-serif;
-	margin-left: 10%;
+	font-family: 'Hind', sans-serif;
+	background-color: #f9f9f9;
+	margin: 0;
+} 
+
+/*
+NAV BAR / HEADER
+ */
+
+nav {
+	width: 100%;
+	height: 40px;
+	background-color: #F3843E;
+	padding-left: 10%;
+	padding-right: 10%;
+	margin: 0;
+	padding-top: 5px;
 }
 
 h1 {
-/*	font-family: 'UnifrakturMaguntia', cursive;
-*/
+	font-family: 'Oswald', sans-serif, bold;
+	display: inline;
 }
 
-button.new-search {
+.header-buttons {
 	float: right;
-	}
+	display: inline;
+	margin-right: 20%;
+	margin-top: 7px;
+}
 
-.header {
-	height: 40px;
+.header-buttons button {
+	background-color: #f9f9f9;
+}
+
+.header-buttons button:hover {
+	background-color: white;
+}
+
+/*
+MAIN
+ */
+
+.main {
+	margin-left: 10%;
+	margin-right: 10%;
+}
+
+a:link {
+	text-decoration: none;
+}
+
+.article-headline {
+	color: black;
+	font-family: 'Oswald', sans-serif, bold;
+}
+
+.article-headline:hover {
+	color: #F3843E;
 }
 
 .second-line {
-/*	display: inline;
-*/}
+	font-weight: bold;
+	font-style: italic;
+}
+
+.article {
+	background-color: white;
+	padding-left: 20px;
+	padding-right: 20px;
+	margin-top: 20px;
+	border-radius: 5px;
+	border: solid 1px;
+	border-color: #c7c7c7;
+}
+
+
+/* MAIN BUTTONS */
+
+button {
+	margin-left: 10px;
+	border-radius: 5px;
+	border: none;
+	font-weight: bold;
+	font-size: 12px;
+}
+
+button:hover {
+	background-color: #F3843E;
+	border: none;
+	border-radius: 5px;
+}
+
+.search-term {
+	margin-left: 0;
+	margin-right: 10px;
+}
 
 .add-to-fav-button {
-	color: orange;
 	background-color: white;
 	border-color: #6E6E6E;
+	vertical-align: middle;
+}
+
+.search-type {
 	margin-left: 20px;
 }
 
-.add-to-fav-button:hover {
-	background-color: #F3843E;
+.next {
+	margin-left: 0;
+	margin-top: 15px;
+	margin-bottom: 25px;
 }
 
-/*.article {
-	background-color: #6E6E6E;
-	padding: 10px;
-	margin: 10px;
-}*/
+.add-to-fav-button {
+	border-radius: 5px;
+	border: solid 1px;
+	border-color: #c7c7c7;
+	margin-left: 20px;
+}
+
+
+/*
+Color Pallet:
+Light gray: #f9f9f9
+Dark gray: #6E6E6E
+Orange: #F3843E
+*/
 
 
