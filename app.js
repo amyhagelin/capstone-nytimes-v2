@@ -175,7 +175,7 @@ function watchNewSearch() {
   $(document).on('click', 'button.new-search', function(event) { 
     $('#js-search-results').empty();
     $('#search-terms').empty();
-    $( "#header" ).hide();
+    // $( "#header" ).hide();
     renderHome();
     renderHeader();
     state.searchTermArr = [];
