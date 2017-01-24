@@ -1,7 +1,10 @@
 
-// set quotations to either " or '
-// update buttons with #id instead of class
-// create watchNext and watchStartOver functions
+// - empty inputs - prevent
+// - logo - new search link (cursor: pointer)
+// - next is possible with no article
+// - my reading list click when no articles added - no result
+// - adding to favourites 
+// - consoles logs cleanup
 
 
 var state = {
@@ -12,8 +15,8 @@ var state = {
 }
 
 if (localStorage) {
-  state.favoriteArticles = JSON.parse(localStorage.getItem('articles'))
-  console.log(state.favoriteArticles)
+  state.favoriteArticles = JSON.parse(localStorage.getItem('articles')) || []
+  console.log('localstorage get', state.favoriteArticles)
 }
 
 
@@ -175,7 +178,6 @@ function watchNewSearch() {
   $(document).on('click', 'button.new-search', function(event) { 
     $('#js-search-results').empty();
     $('#search-terms').empty();
-    // $( "#header" ).hide();
     renderHome();
     renderHeader();
     state.searchTermArr = [];
@@ -198,6 +200,7 @@ $(function() {
   watchSearchBox();
   watchNext();
   watchNewSearch();
+  // make a function here
   $(document).on('click', '.add-to-fav-button', function(event) { 
     var articleId = $(this).data('article-id');
     // we have articleId
@@ -216,11 +219,16 @@ $(function() {
       localStorage.setItem('articles', JSON.stringify(state.favoriteArticles))  
     }
     console.log(state.favoriteArticles);
+    // render confirmation - 'New articles has just been added'
+    confirm('New articles has just been added')
     // renderFavoritesButton();
-    watchFavorites();
+    
     // render the fav article
     // store it somewhere, and rerender whole array
     // store using localStorage (?)
   });
+
+  // TODO: add hiding everything before showing favorites
+  watchFavorites();
 });
 
