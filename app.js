@@ -1,9 +1,9 @@
 
-// - empty inputs - prevent
-// - logo - new search link (cursor: pointer)
-// - next is possible with no article
-// - my reading list click when no articles added - no result
-// - adding to favourites 
+// - empty inputs - prevent - DONE
+// - logo - new search link (cursor: pointer) - DONE
+// - next is possible with no article - HELP
+// - my reading list click when no articles added - no result - DONE
+// - added to favourites - HOW TO USE NOTY?
 // - consoles logs cleanup
 
 
@@ -16,7 +16,6 @@ var state = {
 
 if (localStorage) {
   state.favoriteArticles = JSON.parse(localStorage.getItem('articles')) || []
-  console.log('localstorage get', state.favoriteArticles)
 }
 
 
@@ -65,14 +64,10 @@ function renderHome() {
 
 
 function renderHeader() {
-  var resultElement = '<div><h1>My NY Times</h1><div class="header-buttons"><button class="favorites">My Reading List</button><button class="new-search">New Search</button></div></div>';
+  var resultElement = '<div><span id="logo"><h1>My NY Times</h1></span><div class="header-buttons"><button class="favorites">My Reading List</button><button class="new-search">New Search</button></div></div>';
   $('#header').html(resultElement);
 }
 
-// function renderFavoritesButton() {
-//   var resultElement = '<div><button class="favorites">My Reading List</button></div>';
-//   $('#favorites').html(resultElement);
-// }
 
 function renderSearchTermButton(searchTerms) {
 	var resultElement = searchTerms.reduce(function(acc, item) {
@@ -88,13 +83,13 @@ function renderSearchData(data) {
     resultElement = data.response.docs.reduce(function(acc, item) {
       var currentDate = moment(item.pub_date).fromNow(); // .format('MMM Do YYYY')
       if (item.headline.main === undefined) {
- 	     return acc += '<div class="article"><a target="_blank" href="' + item.web_url + '"><h3>' + 
+ 	     return acc += '<div class="article"><a target="_blank" href="' + item.web_url + '"><h3 class="article-headline">' + 
        item.headline.name + '</h3></a><div class="second-line"><p>' + currentDate +
        '<button title="Add to My Reading List" class="add-to-fav-button" data-article-id="' + item._id + '">&#10133;</button></p></div><p>' 
 	     + item.snippet + '</p></div>'
   	  }
 	     else {
-  	    return acc += '<div class="article"><a target="_blank" href="' + item.web_url + '"><h3>' + 
+  	    return acc += '<div class="article"><a target="_blank" href="' + item.web_url + '"><h3 class="article-headline">' + 
   	    item.headline.main + '</h3></a><div class="second-line"><p>' + currentDate +
         '<button title="Add to My Reading List" class="add-to-fav-button" data-article-id="' + item._id + '">&#10133;</button></p></div><p>'
   	    + item.snippet + '</p></div>'
@@ -109,9 +104,8 @@ function renderSearchData(data) {
 
 
 function renderFavorites(data) {
-  console.log(data)
-  var resultElement = ''; 
-  resultElement = data.reduce(function(acc, item) {
+  var resultElement = '<button id="clear-all">Clear All</button>'; 
+  resultElement += data.reduce(function(acc, item) {
       if (item[0].headline.main === undefined) {
        return acc += '<div class="article"><a target="_blank" href="' + item[0].web_url + '"><h3 class="article-headline">' + 
        item[0].headline.name + '</h3></a><p>' + item[0].snippet + '</p></div>'
@@ -124,12 +118,17 @@ function renderFavorites(data) {
   $('#js-search-results').html(resultElement);
 }
 
+
 function watchSubmit() {
   $(document).on('submit', '.js-submit-form', function(e) {
     e.preventDefault();
-     $( '#start-page-search' ).hide();
-    $( '.hide-me' ).hide();
     var query = $(this).find('.js-query').val();
+    if (query === "") {
+      noty({text: 'Please input a search term.', timeout: 2000, type: 'warning', layout: 'top'});
+      return false;
+    }
+    $( '#start-page-search' ).hide();
+    $( '.hide-me' ).hide();
     state.searchTermArr.push(query);
     renderSearchTermButton(state.searchTermArr);
     $('.js-query').val('');
@@ -140,10 +139,14 @@ function watchSubmit() {
 function watchSearchBox() {
   $(document).on('submit', '.js-search-form', function(e) {
     e.preventDefault();
+    var query = $(this).find('.js-query').val();
+    if (query === "") {
+      noty({text: 'Please input a search term.', timeout: 2000, type: 'warning', layout: 'top'});
+      return false;
+    }
     $( "#start-page" ).hide();
     $( "p.hide-me" ).hide();
     renderHeader();
-    var query = $(this).find('.js-query').val();
     if($('#new-box').prop('checked')) {
       getDataAndSaveResults(query, renderSearchData, 'newest');
     }
@@ -165,6 +168,10 @@ function watchSearchTermButton() {
 
 function watchNext() {
   $(document).on('click', 'button.next', function(event) { 
+    if (state.searchTermArr && !state.searchTermArr.length) { // equal to: state.searchTermArr.length === 0
+      noty({text: 'Please input a search term.', timeout: 2000, type: 'warning', layout: 'top'});
+      return false;
+    }
     $( "#start-page-search" ).hide();
     renderHeader();
     $("#search-terms").prepend("<p>Click on a search term to see the latest articles:</p>");
@@ -185,11 +192,48 @@ function watchNewSearch() {
 }
 
 
+function watchLogo() {
+  $(document).on('click', '#logo', function(event) { 
+    $('#js-search-results').empty();
+    $('#search-terms').empty();
+    renderHome();
+    renderHeader();
+    state.searchTermArr = [];
+  });
+}
+
+
 function watchFavorites() {
   $(document).on('click', 'button.favorites', function(event) { 
+  $( "#start-page" ).hide();
+  $( "#start-page-search" ).hide();
+  $( '.hide-me' ).hide();
   renderFavorites(state.favoriteArticles);
   renderHeader();
   });
+  }
+
+function watchClearAll() {
+  $(document).on('click', '#clear-all', function(event) { 
+    state.favoriteArticles = [];
+    localStorage.setItem('articles', JSON.stringify(state.favoriteArticles));  
+    renderFavorites(state.favoriteArticles);
+  });
+}
+
+  function addToFavorites() {
+    $(document).on('click', '.add-to-fav-button', function(event) { 
+      var articleId = $(this).data('article-id');
+      var article = jQuery.grep(state.searchResults, function(item) {
+        return item._id === articleId;
+      });
+      state.favoriteArticles.push(article);
+      if (localStorage) {
+        localStorage.setItem('articles', JSON.stringify(state.favoriteArticles))  
+      }
+      noty({text: 'An article was added to your reading list.', timeout: 2000, type: 'success'});
+      // confirm('New articles has just been added')
+    });
   }
 
 
@@ -200,35 +244,9 @@ $(function() {
   watchSearchBox();
   watchNext();
   watchNewSearch();
-  // make a function here
-  $(document).on('click', '.add-to-fav-button', function(event) { 
-    var articleId = $(this).data('article-id');
-    // we have articleId
-    // then we have to have article object
-    // so we have to find proper article in searchResults using articleId
-    // then we can finally add the object into the favoriteArticles array
-    console.log(articleId);
-    console.log(state.searchResults);
-    // use https://api.jquery.com/jQuery.inArray/ instead
-    var article = jQuery.grep(state.searchResults, function(item) {
-      return item._id === articleId;
-    });
-    console.log(article);
-    state.favoriteArticles.push(article);
-    if (localStorage) {
-      localStorage.setItem('articles', JSON.stringify(state.favoriteArticles))  
-    }
-    console.log(state.favoriteArticles);
-    // render confirmation - 'New articles has just been added'
-    confirm('New articles has just been added')
-    // renderFavoritesButton();
-    
-    // render the fav article
-    // store it somewhere, and rerender whole array
-    // store using localStorage (?)
-  });
-
-  // TODO: add hiding everything before showing favorites
+  watchLogo();
+  addToFavorites();
   watchFavorites();
+  watchClearAll();
 });
 
