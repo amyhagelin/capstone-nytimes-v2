@@ -41,22 +41,23 @@ function getDataAndSaveResults(searchTerm, callback, sort) {
 function renderHome() {
   var resultElement = 
   '<div id="start-page">' +
-      "<p>Input the topics you'd like to read about today, clicking the + button after each one. When you're finished, click Next.</p>" +
+      '<h1>Curate the NY Times to match your interests.</br>Stay up to date on what you care about.</br>Save your favorite articles for later.</h1>' +
+      "<p class='how-to'>Input the topics you'd like to read about today,</br>clicking the + button after each one.</br>When you're finished, click Next.</p>" +
       '<form action="#" class="js-submit-form">' +
       '<label for="query"></label>' +
          '<input id="clear-me" type="text" class="js-query">'+
-         '<button type="submit">&#10133;</button></br>'+
+         '<button class="search" type="submit">&#10133;</button></br>'+
        '</form>'+
-       '<button class="next">Next</button>'+
+       '<button class="next search">Next</button>'+
      '</div>'+
      '<p class="hide-me">Or search for an article directly:</p>'+
      '<div id="start-page-search">'+
        '<form action="#" class="js-search-form">'+
        '<label for="query"></label>'+
        '<input type="text" class="js-query">'+
-       '<button type="submit">Search</button>'+
-       '<label><input class="search-type" type="radio" name="article-search-type" id="new-box" value="first_checkbox" required>Show newest first</label>'+
-        '<input class="search-type" type="radio" name="article-search-type" id="relevant-box" value="second_checkbox" required> <label for="cbox2">Show most relevant first</label>'+
+       '<button class="search" type="submit">Search</button>'+
+       '<label class="search-type"><input type="radio" name="article-search-type" id="new-box" value="first_checkbox" required>Show newest first</label>'+
+        '<input type="radio" name="article-search-type" id="relevant-box" value="second_checkbox" required> <label class="search-type" for="cbox2">Show most relevant first</label>'+
      '</form>'+
   '</div>';
   $('#home').html(resultElement);

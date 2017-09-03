@@ -2,6 +2,9 @@ body {
 	font-family: 'Hind', sans-serif;
 	background-color: #f9f9f9;
 	margin: 0;
+	background-image: url('coffee2.jpeg');
+	background-size: cover;
+    background-repeat: no-repeat;
 } 
 
 /*
@@ -10,18 +13,21 @@ NAV BAR / HEADER
 
 nav {
 	width: 100%;
-	height: 40px;
+	height: 50px;
 	background-color: #F3843E;
 	padding-left: 10%;
 	padding-right: 10%;
 	margin: 0;
 	padding-top: 5px;
-	margin-bottom: 20px;
 }
 
 h1 {
 	font-family: 'Oswald', sans-serif, bold;
 	display: inline;
+}
+
+.how-to {
+	margin-top: 30px;
 }
 
 .header-buttons {
@@ -50,6 +56,8 @@ MAIN
 .main {
 	margin-left: 10%;
 	margin-right: 10%;
+	padding-top: 40px;
+	font-size: 18px;
 }
 
 a:link {
@@ -83,21 +91,44 @@ a:link {
 	border-color: #c7c7c7;
 }
 
+input[type="text"] {
+	width: 120px;
+	height: 30px;
+	font-size: 14px;
+	border: none;
+}
 
 /* MAIN BUTTONS */
 
 button {
-	margin-left: 10px;
-	border-radius: 5px;
+	/*margin-left: 10px;*/
 	border: none;
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 14px;
+	margin-left: 20px;
+	height: 30px;
+	background-color: #bdbdbd;
+}
+
+button.search {
+	font-weight: bold;
+	height: 32px;
+	margin-left: 0;
+	min-width: 40px;
+	margin-bottom: 25px;
+	margin-right: 20px;
+}
+
+button.next {
+	background-color: #F3843E;
+	height: 40px;
+	width: 80px;
+	font-size: 16px;
 }
 
 button:hover {
 	background-color: #F3843E;
 	border: none;
-	border-radius: 5px;
 }
 
 .search-term {
@@ -112,13 +143,7 @@ button:hover {
 }
 
 .search-type {
-	margin-left: 20px;
-}
-
-.next {
-	margin-left: 0;
-	margin-top: 15px;
-	margin-bottom: 25px;
+	margin-right: 20px;
 }
 
 .add-to-fav-button {
